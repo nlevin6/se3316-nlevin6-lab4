@@ -85,52 +85,72 @@ app.get('/superhero/:id/powers', (req, res) => {
     });
 });
 
-
-
-
-
-
-//get superhero_info.json
-app.get('/server/superhero_info.json', (req, res) => {
-
+//get publishers
+app.get('/publishers', (req, res) => {
     fs.readFile('server/superhero_info.json', 'utf8', (err, data) => {
         if (err) {
-            console.error("Error reading the file: ", err);
-            //set response header with code 500, content is sent in plain text
-            res.writeHead(500, { 'Content-Type': 'text/plain' }); 
-            res.end('Error reading the file');
+            console.error('Error reading superhero_info.json file: ', err);
+            res.status(500).json({ error: 'Error reading superhero_info.json file' });
             return;
         }
-        res.setHeader('Content-Type', 'application/json');
-        //set status code to 200, send the json file data
-        res.status(200).send(data);
-
-        //get all available publisher names
         try {
-            const heroes = JSON.parse(data); // parse JSON data
-            const publisherNames = [...new Set(heroes.map(hero => hero.Publisher))]; // extract publisher names
-    
-            console.log(publisherNames);
+            const heroes = JSON.parse(data);
+            const publisherNames = [...new Set(heroes.map(hero => hero.Publisher))];
+
+            res.json({ publishers: publisherNames });
         } catch (error) {
-            console.error('Error parsing JSON: ', error);
+            console.error('Error parsing superhero_info.json:', error);
+            res.status(500).json({ error: 'Error parsing superhero_info.json' });
         }
     });
 });
 
-//get superhero_powers.json
-app.get('/server/superhero_powers.json', (req, res) => {
 
-    fs.readFile('server/superhero_powers.json', 'utf8', (err, data) => {
-        if (err) {
-            console.error("Error reading the file: ", err);
-            res.writeHead(500, { 'Content-Type': 'text/plain' });
-            res.end('Error reading the file');
-            return;
-        }
-        res.setHeader('Content-Type', 'application/json');
-        res.status(200).send(data);
-    });
-});
+
+
+
+
+// //get superhero_info.json
+// app.get('/server/superhero_info.json', (req, res) => {
+
+//     fs.readFile('server/superhero_info.json', 'utf8', (err, data) => {
+//         if (err) {
+//             console.error("Error reading the file: ", err);
+//             //set response header with code 500, content is sent in plain text
+//             res.writeHead(500, { 'Content-Type': 'text/plain' }); 
+//             res.end('Error reading the file');
+//             return;
+//         }
+//         res.setHeader('Content-Type', 'application/json');
+//         //set status code to 200, send the json file data
+//         res.status(200).send(data);
+
+//         //get all available publisher names
+//         try {
+//             const heroes = JSON.parse(data); // parse JSON data
+//             const publisherNames = [...new Set(heroes.map(hero => hero.Publisher))]; // extract publisher names
+    
+//             console.log(publisherNames);
+//         } catch (error) {
+//             console.error('Error parsing JSON: ', error);
+//         }
+//     });
+// });
+
+// //get superhero_powers.json
+// app.get('/server/superhero_powers.json', (req, res) => {
+
+//     fs.readFile('server/superhero_powers.json', 'utf8', (err, data) => {
+//         if (err) {
+//             console.error("Error reading the file: ", err);
+//             res.writeHead(500, { 'Content-Type': 'text/plain' });
+//             res.end('Error reading the file');
+//             return;
+//         }
+//         res.setHeader('Content-Type', 'application/json');
+//         res.status(200).send(data);
+//     });
+// });
 
 
 //port listen message

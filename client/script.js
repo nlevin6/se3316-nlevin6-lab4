@@ -31,3 +31,21 @@ function getSuperheroInfoAndPowers() {
         console.error('error: ', error);
     });
 }
+
+// Function to get all available publisher names
+function getPublisherNames() {
+    fetch('/publishers')
+        .then(response => response.json())
+        .then(data => {
+            const publisherInfo = document.getElementById('publisherInfo');
+            publisherInfo.innerHTML = '<h2>Publisher Names:</h2>';
+            data.publishers.forEach(publisher => {
+                publisherInfo.innerHTML += `<p>${publisher}</p>`;
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Hook up the button to get publisher names
+document.getElementById('getPublisherButton').addEventListener('click', getPublisherNames);
+
