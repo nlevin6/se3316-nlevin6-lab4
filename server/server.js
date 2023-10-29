@@ -12,10 +12,9 @@ app.use((req, res, next) => {
     console.log(`${req.method} request for ${req.url}`);
     next();
 });
-
-//USAGE EXAMPLE: http://localhost:3000/superhero/0. Will give info for hero with id 0
-app.get('/superhero/:id', (req, res) => {
-    const superheroID = parseInt(req.params.id); //extract the ID from the request URL
+//USAGE EXAMPLE: http://localhost:3000/superhero/a-bomb. will display info about A-Bomb
+app.get('/superhero/', (req, res) => {
+    const superheroName = req.query.name; //extract the hero name
 
     fs.readFile('server/superhero_info.json', 'utf8', (err, data) => {
         if (err) {
@@ -24,10 +23,10 @@ app.get('/superhero/:id', (req, res) => {
             return;
         }
         try {
-            const heroInfo = JSON.parse(data);
+            const allHeroes = JSON.parse(data);
 
-            //find the superhero by ID
-            const superhero = heroInfo.find(hero => hero.id === superheroID);
+            //find the superhero by name
+            const superhero = allHeroes.find(hero => hero.name.toLowerCase() === superheroName.toLowerCase());
 
             if (superhero) {
                 res.json(superhero); //send superhero information as JSON response
@@ -104,54 +103,6 @@ app.get('/publishers', (req, res) => {
         }
     });
 });
-
-
-
-
-
-
-// //get superhero_info.json
-// app.get('/server/superhero_info.json', (req, res) => {
-
-//     fs.readFile('server/superhero_info.json', 'utf8', (err, data) => {
-//         if (err) {
-//             console.error("Error reading the file: ", err);
-//             //set response header with code 500, content is sent in plain text
-//             res.writeHead(500, { 'Content-Type': 'text/plain' }); 
-//             res.end('Error reading the file');
-//             return;
-//         }
-//         res.setHeader('Content-Type', 'application/json');
-//         //set status code to 200, send the json file data
-//         res.status(200).send(data);
-
-//         //get all available publisher names
-//         try {
-//             const heroes = JSON.parse(data); // parse JSON data
-//             const publisherNames = [...new Set(heroes.map(hero => hero.Publisher))]; // extract publisher names
-    
-//             console.log(publisherNames);
-//         } catch (error) {
-//             console.error('Error parsing JSON: ', error);
-//         }
-//     });
-// });
-
-// //get superhero_powers.json
-// app.get('/server/superhero_powers.json', (req, res) => {
-
-//     fs.readFile('server/superhero_powers.json', 'utf8', (err, data) => {
-//         if (err) {
-//             console.error("Error reading the file: ", err);
-//             res.writeHead(500, { 'Content-Type': 'text/plain' });
-//             res.end('Error reading the file');
-//             return;
-//         }
-//         res.setHeader('Content-Type', 'application/json');
-//         res.status(200).send(data);
-//     });
-// });
-
 
 //port listen message
 app.listen(port, () => {

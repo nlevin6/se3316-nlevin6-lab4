@@ -1,39 +1,48 @@
 document.getElementById('getInfoButton').addEventListener('click', getSuperheroInfoAndPowers);
 
 function getSuperheroInfoAndPowers() {
-    const superheroId = document.getElementById('superheroId').value;
+    const superheroName = document.getElementById('superheroId').value;
 
-    Promise.all([
-        fetch(`/superhero/${superheroId}`).then(response => response.json()), //fetch hero info
-        fetch(`/superhero/${superheroId}/powers`).then(response => response.json()) //fetch corresponding hero powers
-    ])
-    .then(data => {
-        const [info, powers] = data;
+    fetch(`/superhero/?name=${superheroName}`)
+        .then(response => response.json())
+        .then(data => {
+            const heroInfo = document.getElementById('superheroInfo');
+            if (data.message) {
+                heroInfo.textContent = data.message;
+            } else {
+                heroInfo.innerHTML = `<h2>${data.name}</h2>`;
+                for (const [key, value] of Object.entries(data)) {
+                    if (key !== 'id' && key !=='name') { //fields i dont want to be displayed for the hero info
+                        heroInfo.innerHTML += `<p><strong>${key}:</strong> ${value}</p>`;
+                    }
+                }
 
-        const heroInfo = document.getElementById('superheroInfo');
-        const heroPowers = document.getElementById('superheroPowers');
+                //fetch superhero powers
+                fetch(`/superhero/${data.id}/powers`)
+                    .then(response => response.json())
+                    .then(powersData => {
+                        const heroPowers = document.getElementById('superheroPowers');
+                        if (powersData.message) {
+                            heroPowers.textContent = powersData.message;
+                        } else {
+                            heroPowers.innerHTML = '<h3>Powers:</h3>';
+                            for (const [key, value] of Object.entries(powersData)) {
+                                if (value === 'True') {//dont want it to type true next to the powers they have
+                                    heroPowers.innerHTML += `<p>${key}</p>`;
+                                }
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching superhero powers:', error);
+                    });
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching superhero information:', error);
+        });
 
-        //hero info
-        if (info.message) {
-            heroInfo.textContent = info.message;
-        } else {
-            heroInfo.textContent = JSON.stringify(info, null, 2);
-        }
-
-        //hero powers
-        if (powers.message) {
-            heroPowers.textContent = powers.message;
-        } else {
-            heroPowers.textContent = JSON.stringify(powers, null, 2);
-        }
-    })
-    .catch(error => {
-        console.error('error: ', error);
-    });
-}
-
-// Function to get all available publisher names
-function getPublisherNames() {
+    //fetch publisher names (idk why yet, but my prof wants me to)
     fetch('/publishers')
         .then(response => response.json())
         .then(data => {
@@ -43,9 +52,7 @@ function getPublisherNames() {
                 publisherInfo.innerHTML += `<p>${publisher}</p>`;
             });
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error fetching publishers:', error);
+        });
 }
-
-// Hook up the button to get publisher names
-document.getElementById('getPublisherButton').addEventListener('click', getPublisherNames);
-
