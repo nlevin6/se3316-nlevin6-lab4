@@ -2,7 +2,15 @@ const express = require('express');
 const fs = require('fs');
 const app = express();
 const port = 3000;
-const router = express.Router();
+
+let superheroData = [];
+fs.readFile('server/superhero_info.json', 'utf8', (err, data) => {
+    if (err) {
+        console.error('Error reading superhero_info.json file: ', err);
+        return;
+    }
+    superheroData = JSON.parse(data);
+});
 
 //set up serving front-end code
 app.use(express.static('client'));
@@ -12,7 +20,7 @@ app.use((req, res, next) => {
     console.log(`${req.method} request for ${req.url}`);
     next();
 });
-//USAGE EXAMPLE: http://localhost:3000/superhero/a-bomb. will display info about A-Bomb
+
 app.get('/superhero/', (req, res) => {
     const superheroName = req.query.name; //extract the hero name
 
@@ -40,6 +48,7 @@ app.get('/superhero/', (req, res) => {
     });
 });
 
+//ugly json format only
 //USAGE EXAMPLE: http://localhost:3000/superhero/0/powers. Will give powers for hero with id 0
 app.get('/superhero/:id/powers', (req, res) => {
     const superheroID = req.params.id;
@@ -103,6 +112,49 @@ app.get('/publishers', (req, res) => {
         }
     });
 });
+
+//get the first n number of matching superhero IDs for a given search pattern matching a given information field
+app.get('/superhero/search', (req, res) => {
+    const { publisher, name, n, race, power } = req.query;
+
+    let filteredHeroes = superheroData.filter(hero => {
+        const byPublisher = publisher ? hero.Publisher.toLowerCase() === publisher.toLowerCase() : true;
+        const byName = name ? hero.name.toLowerCase().includes(name.toLowerCase()) : true;
+        const byRace = race ? hero.Race.toLowerCase() === race.toLowerCase() : true;
+        let byPower = true;
+
+        if (power) {
+            const powersData = require('./superhero_powers.json');
+            const heroPowers = powersData.find(p => p.hero_name === hero.name);
+
+            byPower = heroPowers && heroPowers[power] === 'True';
+        }
+
+        return byRace && byPublisher && byName && byPower;
+    });
+
+    if (filteredHeroes.length === 0) {
+        res.status(404).json({ message: 'No matching superheroes found' });
+    } else {
+        let result = filteredHeroes;
+        if (n && parseInt(n) > 0) {
+            result = filteredHeroes.slice(0, parseInt(n));
+        }
+        res.json({ matchingSuperheroes: result });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
 
 //port listen message
 app.listen(port, () => {
