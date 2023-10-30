@@ -118,7 +118,7 @@ app.get('/superhero/search', (req, res) => {
     const { publisher, name, n, race, power } = req.query;
 
     let filteredHeroes = superheroData.filter(hero => {
-        const byPublisher = publisher ? hero.Publisher.toLowerCase() === publisher.toLowerCase() : true;
+        const byPublisher = (publisher && publisher !== 'All') ? hero.Publisher.toLowerCase() === publisher.toLowerCase() : true;
         const byName = name ? hero.name.toLowerCase().includes(name.toLowerCase()) : true;
         const byRace = race ? hero.Race.toLowerCase() === race.toLowerCase() : true;
         let byPower = true;
@@ -130,7 +130,7 @@ app.get('/superhero/search', (req, res) => {
             byPower = heroPowers && heroPowers[power] === 'True';
         }
 
-        return byRace && byPublisher && byName && byPower;
+        return byPublisher && byName && byRace && byPower;
     });
 
     if (filteredHeroes.length === 0) {
