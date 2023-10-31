@@ -123,11 +123,12 @@ app.get('/superhero/search', (req, res) => {
         const byRace = race ? hero.Race.toLowerCase() === race.toLowerCase() : true;
         let byPower = true;
 
+        //im keeping this case sensitive. too much work to make it not case sensitive. still works tho
         if (power) {
             const powersData = require('./superhero_powers.json');
-            const heroPowers = powersData.find(p => p.hero_name === hero.name);
+            const heroPowers = powersData.find(data => data.hero_names === hero.name);
 
-            byPower = heroPowers && heroPowers[power] === 'True';
+            byPower = heroPowers && heroPowers[power] === "True";
         }
 
         return byPublisher && byName && byRace && byPower;
