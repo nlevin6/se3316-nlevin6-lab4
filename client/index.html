@@ -6,12 +6,9 @@
 </head>
 <body>
     <h1>Superhero Codex</h1>
-    <!--<label for="superheroId">Enter Superhero Name:</label>
-    <input type="text" id="superheroId" placeholder="Enter Name">
-    <button id="getInfoButton">Get Hero Info</button>-->
+    <!--search parameters-->
     <label for="publisher">Choose Publisher:</label>
-    <select id="publisher">
-    </select>
+    <select id="publisher"></select>
     <label for="pattern">Enter Hero Name:</label>
     <input type="text" id="pattern" placeholder="">
     <label for="race">Enter Hero Race:</label>
@@ -21,8 +18,15 @@
     <label for="limit">Limit Number of Matches:</label>
     <input type="number" id="limit" min="1">
     <button id="searchButton">Search</button>
+    
+    <!--user created lists section-->
+    <div>
+        <input type="text" id="listName" placeholder="Enter List Name">
+        <button onclick="createList()">Create List</button>
+        <select id="existingLists"></select>
+    </div>
+
     <div id="searchResults"></div>
-    <div id="publisherInfo"></div>
     <script src="script.js"></script>
 </body>
 </html>

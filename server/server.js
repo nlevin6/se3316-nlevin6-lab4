@@ -2,8 +2,11 @@ const express = require('express');
 const fs = require('fs');
 const app = express();
 const port = 3000;
+const bodyParser = require('body-parser');
 
-let superheroData = [];
+let superheroLists = [];//all user created lists
+
+let superheroData = [];//all superhero data
 fs.readFile('server/superhero_info.json', 'utf8', (err, data) => {
     if (err) {
         console.error('Error reading superhero_info.json file: ', err);
@@ -20,6 +23,9 @@ app.use((req, res, next) => {
     console.log(`${req.method} request for ${req.url}`);
     next();
 });
+
+//middleware for body parsing for JSON
+app.use(bodyParser.json());
 
 app.get('/superhero/', (req, res) => {
     const superheroName = req.query.name; //extract the hero name
@@ -145,17 +151,38 @@ app.get('/superhero/search', (req, res) => {
     }
 });
 
+app.get('/superhero-lists', (req, res) => {
+    res.json({ lists: superheroLists });
+});
+
+//request to create a new superhero list (POST)
+app.post('/superhero-lists', (req, res) => {
+    const { listName } = req.body; //get list name from request body
+    
+    const listExists = checkIfListExists(listName);
+
+    if (listExists) {
+        return res.status(400).json({ error: 'List name already exists' });
+    }
+
+    saveSuperheroList(listName);
+
+    res.status(200).json({ message: 'Superhero list created successfully' });
+});
 
 
+function checkIfListExists(listName) {
+  return superheroLists.some(list => list.name === listName);
+}
 
+function saveSuperheroList(listName) {
+  if (checkIfListExists(listName)) {
+    throw new Error('List name already exists');
+  }
 
-
-
-
-
-
-
-
+  //save the list
+  superheroLists.push({ name: listName });
+}
 
 //port listen message
 app.listen(port, () => {

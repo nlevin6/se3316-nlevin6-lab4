@@ -16,6 +16,10 @@ input, select, button {
     width: 200px; 
 }
 
+#existingLists{
+    width: 200px;
+}
+
 .superhero-container {
     margin-top: 20px;
     border: 2px solid #000000; 

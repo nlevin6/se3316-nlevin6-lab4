@@ -95,5 +95,59 @@ function populatePublisherDropdown() {
 }
 populatePublisherDropdown();//call it to populate the dropdown menu
 
+// Function to create a new list
+function createList() {
+    const listName = document.getElementById('listName').value;
+
+    fetch('/superhero-lists', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ listName })
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log('List created successfully');
+            //all actions for when the function works successfully go in here
+            fetchExistingLists();
+        } else {
+            alert("List already exists");
+            console.error('Failed to create list');
+        }
+    })
+    .catch(error => {
+        console.error('Error creating list:', error);
+    });
+}
+
+function fetchExistingLists() {
+    fetch('/superhero-lists')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const existingLists = document.getElementById('existingLists');
+            existingLists.innerHTML = ''; //clear existing dropdown options
+            data.lists.forEach(list => {
+                const option = document.createElement('option');
+                option.value = list.name;
+                option.textContent = list.name;
+                existingLists.appendChild(option);
+            });
+           
+        })
+        .catch(error => {
+            console.error('Error fetching existing lists:', error);
+        });
+}
+
+//fetch existing lists when the page loads
+window.onload = fetchExistingLists;
+
+
 
 
