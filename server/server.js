@@ -229,6 +229,20 @@ function saveSuperheroList(listName, superhero) {
     }
   });
 
+//delete a list of superheroes with a given name
+app.delete('/superhero-lists/:listName', (req, res) => {
+    const { listName } = req.params;
+    const listIndex = superheroLists.findIndex(list => list.name === listName);
+
+    if (listIndex !== -1) {
+        superheroLists.splice(listIndex, 1);
+        res.status(200).json({ message: `List "${listName}" and its contents deleted successfully` });
+    } else {
+        res.status(404).json({ error: `List "${listName}" doesn't exist` });
+    }
+});
+
+
 //port listen message
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);

@@ -161,18 +161,25 @@ function fetchExistingLists() {
         .then(data => {
             const existingLists = document.getElementById('existingLists');
             existingLists.innerHTML = ''; //clear existing dropdown options
+
+            //add default option
+            const defaultOption = document.createElement('option');
+            defaultOption.text = 'Select a List';
+            existingLists.add(defaultOption);
+
+            //add other list options made by the user
             data.lists.forEach(list => {
                 const option = document.createElement('option');
                 option.value = list.name;
                 option.textContent = list.name;
                 existingLists.appendChild(option);
             });
-
         })
         .catch(error => {
             console.error('Error fetching existing lists:', error);
         });
 }
+
 
 //fetch existing lists when the page loads
 window.onload = fetchExistingLists;
@@ -180,87 +187,116 @@ window.onload = fetchExistingLists;
 
 function addToSelectedList(superheroName, listName) {
     fetch('/add-to-list', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ superhero: superheroName, listName })
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ superhero: superheroName, listName })
     })
-      .then(response => {
-        if (response.ok) {
-          console.log(`${superheroName} added to ${listName} successfully`);
-        } else {
-          console.error(`Failed to add ${superheroName} to ${listName}`);
-        }
-      })
-      .catch(error => {
-        console.error('Error adding to list:', error);
-      });
-  }
-  
-  //function to fetch and display superheroes in a selected list
-  function displaySelectedList() {
+        .then(response => {
+            if (response.ok) {
+                console.log(`${superheroName} added to ${listName} successfully`);
+            } else {
+                console.error(`Failed to add ${superheroName} to ${listName}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error adding to list:', error);
+        });
+}
+
+//function to fetch and display superheroes in a selected list
+function displaySelectedList() {
     const selectedListName = document.getElementById('existingLists').value;
     const selectedSuperheroesList = document.getElementById('selectedSuperheroesList');
-  
+
     if (selectedListName) {
-      fetch(`/fetch-superheroes-in-list?listName=${selectedListName}`)
-        .then(response => response.json())
-        .then(data => {
-          selectedSuperheroesList.innerHTML = `<h2>Superheroes in ${selectedListName}:</h2>`;
-  
-          if (data.error) {
-            selectedSuperheroesList.textContent = data.error;
-          } else {
-            data.superheroes.forEach(superheroName => {
-              if (superheroName !== undefined) {
-                fetch(`/superhero/?name=${superheroName}`)
-                  .then(response => {
-                    if (!response.ok) {
-                      throw new Error('Superhero information not found');
-                    }
-                    return response.json();
-                  })
-                  .then(superheroData => {
-                    fetch(`/superhero/${superheroData.id}/powers`)
-                      .then(response => response.json())
-                      .then(powersData => {
-                        const superheroContainer = document.createElement('div');
-                        superheroContainer.classList.add('superhero-container');
-  
-                        const superheroInfo = document.createElement('div');
-                        superheroInfo.classList.add('superhero-info');
-                        superheroInfo.innerHTML = `
+        fetch(`/fetch-superheroes-in-list?listName=${selectedListName}`)
+            .then(response => response.json())
+            .then(data => {
+                selectedSuperheroesList.innerHTML = `<h2>Superheroes in ${selectedListName}:</h2>`;
+
+                if (data.error) {
+                    selectedSuperheroesList.textContent = data.error;
+                } else {
+                    data.superheroes.forEach(superheroName => {
+                        if (superheroName !== undefined) {
+                            fetch(`/superhero/?name=${superheroName}`)
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error('Superhero information not found');
+                                    }
+                                    return response.json();
+                                })
+                                .then(superheroData => {
+                                    fetch(`/superhero/${superheroData.id}/powers`)
+                                        .then(response => response.json())
+                                        .then(powersData => {
+                                            const superheroContainer = document.createElement('div');
+                                            superheroContainer.classList.add('superhero-container');
+
+                                            const superheroInfo = document.createElement('div');
+                                            superheroInfo.classList.add('superhero-info');
+                                            superheroInfo.innerHTML = `
                           <h3>${superheroData.name}</h3>
                           ${Object.entries(superheroData)
-                            .filter(([key]) => key !== 'id' && key !== 'name')
-                            .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
-                            .join('')}
+                                                    .filter(([key]) => key !== 'id' && key !== 'name')
+                                                    .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
+                                                    .join('')}
                         `;
-  
-                        superheroContainer.appendChild(superheroInfo);
-  
-                        const superheroPowers = document.createElement('div');
-                        superheroPowers.classList.add('superhero-powers');
-                        superheroPowers.innerHTML = '<h4>Powers:</h4>';
-  
-                        Object.entries(powersData).forEach(([key, value]) => {
-                          if (value === 'True') {
-                            superheroPowers.innerHTML += `<p>${key}</p>`;
-                          }
-                        });
-  
-                        superheroContainer.appendChild(superheroPowers);
-                        selectedSuperheroesList.appendChild(superheroContainer);
-                      })
-                      .catch(error => console.error('Error fetching superhero powers:', error));
-                  })
-                  .catch(error => console.error('Error fetching superhero details:', error));
-              }
-            });
-          }
-        })
-        .catch(error => console.error('Error fetching superheroes in list:', error));
+
+                                            superheroContainer.appendChild(superheroInfo);
+
+                                            const superheroPowers = document.createElement('div');
+                                            superheroPowers.classList.add('superhero-powers');
+                                            superheroPowers.innerHTML = '<h4>Powers:</h4>';
+
+                                            Object.entries(powersData).forEach(([key, value]) => {
+                                                if (value === 'True') {
+                                                    superheroPowers.innerHTML += `<p>${key}</p>`;
+                                                }
+                                            });
+
+                                            superheroContainer.appendChild(superheroPowers);
+                                            selectedSuperheroesList.appendChild(superheroContainer);
+                                        })
+                                        .catch(error => console.error('Error fetching superhero powers:', error));
+                                })
+                                .catch(error => console.error('Error fetching superhero details:', error));
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error fetching superheroes in list:', error));
     }
-  }
-  
+}
+
+function deleteSelectedList() {
+    const selectedListName = document.getElementById('existingLists').value;
+
+    fetch(`/superhero-lists/${selectedListName}`, {
+        method: 'DELETE'
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log(`List "${selectedListName}" deleted successfully`);
+
+            const existingLists = document.getElementById('existingLists');
+
+            // Remove the list from the dropdown if it was selected
+            if (existingLists.value === selectedListName) {
+                existingLists.remove(existingLists.selectedIndex);
+                // Clear the displayed superheroes if the deleted list was being shown
+                const selectedSuperheroesList = document.getElementById('selectedSuperheroesList');
+                selectedSuperheroesList.innerHTML = '';
+            }
+        } else {
+            console.error(`Failed to delete list "${selectedListName}"`);
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting list:', error);
+    });
+}
+
+

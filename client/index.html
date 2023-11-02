@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Superhero Codex</title>
     <link rel="stylesheet" type="text/css" href="stylesheet.css">
 </head>
+
 <body>
     <h1>Superhero Codex</h1>
     <!--search parameters-->
@@ -24,13 +26,19 @@
         <input type="text" id="listName" placeholder="Enter List Name">
         <button onclick="createList()">Create List</button>
         <select id="existingLists" onchange="displaySelectedList()"></select>
+            <!--delete list button-->
+    <button onclick="deleteSelectedList()">Delete List</button>
     </div>
     <div id="selectedSuperheroesList"></div>
+    
 
 
-<div id="superheroesList"></div>
+
+
+    <div id="superheroesList"></div>
 
     <div id="searchResults"></div>
     <script src="script.js"></script>
 </body>
+
 </html>
