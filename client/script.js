@@ -27,7 +27,6 @@ function searchSuperheroes() {
                 data.matchingSuperheroes.forEach(hero => {
                     const superheroContainer = document.createElement('div');
                     superheroContainer.classList.add('superhero-container');
-
                     const superheroInfo = document.createElement('div');
                     superheroInfo.classList.add('superhero-info');
                     superheroInfo.innerHTML = `
@@ -41,13 +40,43 @@ function searchSuperheroes() {
 
                     searchResults.appendChild(superheroContainer); //append the hero info before fetching powers
 
+
+                    const addToListButton = document.createElement('button');
+                    addToListButton.textContent = 'Add to List';
+
+                    const listSelect = document.createElement('select');
+                    listSelect.id = `listSelect-${hero.id}`; // Unique ID for each superhero
+                    listSelect.innerHTML = ''; // Clear existing options
+
+                    fetch('/superhero-lists')
+                        .then(response => response.json())
+                        .then(data => {
+                            data.lists.forEach(list => {
+                                const option = document.createElement('option');
+                                option.value = list.name;
+                                option.textContent = list.name;
+                                listSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error fetching lists:', error);
+                        });
+
+                    addToListButton.addEventListener('click', () => {
+                        const selectedList = listSelect.value;
+                        addToSelectedList(hero.name, selectedList);
+                    });
+
+                    superheroContainer.appendChild(addToListButton);
+                    superheroContainer.appendChild(listSelect);
+                    searchResults.appendChild(superheroContainer);
                     fetch(`/superhero/${hero.id}/powers`)
                         .then(response => response.json())
                         .then(powersData => {
                             const superheroPowers = document.createElement('div');
                             superheroPowers.classList.add('superhero-powers');
                             superheroPowers.innerHTML = '<h3>Powers:</h3>';
-                            
+
                             if (powersData.message) {
                                 superheroPowers.textContent = powersData.message;
                             } else {
@@ -57,7 +86,7 @@ function searchSuperheroes() {
                                     }
                                 });
                             }
-                            
+
                             superheroContainer.appendChild(superheroPowers); //append powers after fetching them
                         })
                         .catch(error => {
@@ -106,19 +135,19 @@ function createList() {
         },
         body: JSON.stringify({ listName })
     })
-    .then(response => {
-        if (response.ok) {
-            console.log('List created successfully');
-            //all actions for when the function works successfully go in here
-            fetchExistingLists();
-        } else {
-            alert("List already exists");
-            console.error('Failed to create list');
-        }
-    })
-    .catch(error => {
-        console.error('Error creating list:', error);
-    });
+        .then(response => {
+            if (response.ok) {
+                console.log('List created successfully');
+                //all actions for when the function works successfully go in here
+                fetchExistingLists();
+            } else {
+                alert("List already exists");
+                console.error('Failed to create list');
+            }
+        })
+        .catch(error => {
+            console.error('Error creating list:', error);
+        });
 }
 
 function fetchExistingLists() {
@@ -138,7 +167,7 @@ function fetchExistingLists() {
                 option.textContent = list.name;
                 existingLists.appendChild(option);
             });
-           
+
         })
         .catch(error => {
             console.error('Error fetching existing lists:', error);
@@ -149,5 +178,89 @@ function fetchExistingLists() {
 window.onload = fetchExistingLists;
 
 
-
-
+function addToSelectedList(superheroName, listName) {
+    fetch('/add-to-list', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ superhero: superheroName, listName })
+    })
+      .then(response => {
+        if (response.ok) {
+          console.log(`${superheroName} added to ${listName} successfully`);
+        } else {
+          console.error(`Failed to add ${superheroName} to ${listName}`);
+        }
+      })
+      .catch(error => {
+        console.error('Error adding to list:', error);
+      });
+  }
+  
+  //function to fetch and display superheroes in a selected list
+  function displaySelectedList() {
+    const selectedListName = document.getElementById('existingLists').value;
+    const selectedSuperheroesList = document.getElementById('selectedSuperheroesList');
+  
+    if (selectedListName) {
+      fetch(`/fetch-superheroes-in-list?listName=${selectedListName}`)
+        .then(response => response.json())
+        .then(data => {
+          selectedSuperheroesList.innerHTML = `<h2>Superheroes in ${selectedListName}:</h2>`;
+  
+          if (data.error) {
+            selectedSuperheroesList.textContent = data.error;
+          } else {
+            data.superheroes.forEach(superheroName => {
+              if (superheroName !== undefined) {
+                fetch(`/superhero/?name=${superheroName}`)
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error('Superhero information not found');
+                    }
+                    return response.json();
+                  })
+                  .then(superheroData => {
+                    fetch(`/superhero/${superheroData.id}/powers`)
+                      .then(response => response.json())
+                      .then(powersData => {
+                        const superheroContainer = document.createElement('div');
+                        superheroContainer.classList.add('superhero-container');
+  
+                        const superheroInfo = document.createElement('div');
+                        superheroInfo.classList.add('superhero-info');
+                        superheroInfo.innerHTML = `
+                          <h3>${superheroData.name}</h3>
+                          ${Object.entries(superheroData)
+                            .filter(([key]) => key !== 'id' && key !== 'name')
+                            .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
+                            .join('')}
+                        `;
+  
+                        superheroContainer.appendChild(superheroInfo);
+  
+                        const superheroPowers = document.createElement('div');
+                        superheroPowers.classList.add('superhero-powers');
+                        superheroPowers.innerHTML = '<h4>Powers:</h4>';
+  
+                        Object.entries(powersData).forEach(([key, value]) => {
+                          if (value === 'True') {
+                            superheroPowers.innerHTML += `<p>${key}</p>`;
+                          }
+                        });
+  
+                        superheroContainer.appendChild(superheroPowers);
+                        selectedSuperheroesList.appendChild(superheroContainer);
+                      })
+                      .catch(error => console.error('Error fetching superhero powers:', error));
+                  })
+                  .catch(error => console.error('Error fetching superhero details:', error));
+              }
+            });
+          }
+        })
+        .catch(error => console.error('Error fetching superheroes in list:', error));
+    }
+  }
+  

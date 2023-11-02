@@ -170,7 +170,6 @@ app.post('/superhero-lists', (req, res) => {
     res.status(200).json({ message: 'Superhero list created successfully' });
 });
 
-
 function checkIfListExists(listName) {
   return superheroLists.some(list => list.name === listName);
 }
@@ -183,6 +182,52 @@ function saveSuperheroList(listName) {
   //save the list
   superheroLists.push({ name: listName });
 }
+
+function saveSuperheroList(listName, superhero) {
+    //check if the list already exists
+    const existingList = superheroLists.find(list => list.name === listName);
+  
+    if (existingList) {
+      existingList.superheroes.push(superhero);
+    } else {
+      //create a new list with the superhero
+      superheroLists.push({ name: listName, superheroes: [superhero] });
+    }
+  }
+  
+  //update the list with a superhero (POST or PUT)
+  app.put('/add-to-list', (req, res) => {
+    const { superhero, listName } = req.body;
+  
+    const selectedList = superheroLists.find(list => list.name === listName);
+  
+    if (selectedList) {
+      //update the list with the new superhero
+      saveSuperheroList(listName, superhero);
+  
+      res.status(200).json({ message: `${superhero} added to ${listName} successfully` });
+    } else {
+      res.status(404).json({ error: 'List not found' });
+    }
+  });
+  
+  //fetch superheroes in a selected list
+  app.get('/fetch-superheroes-in-list', (req, res) => {
+    const { listName } = req.query;
+  
+    if (listName) {
+      const selectedList = superheroLists.find(list => list.name === listName);
+  
+      if (selectedList) {
+        const superheroes = selectedList.superheroes || [];
+        res.status(200).json({ superheroes });
+      } else {
+        res.status(404).json({ error: 'List not found' });
+      }
+    } else {
+      res.status(400).json({ error: 'List name not provided' });
+    }
+  });
 
 //port listen message
 app.listen(port, () => {

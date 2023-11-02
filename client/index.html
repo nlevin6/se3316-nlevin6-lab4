@@ -18,13 +18,17 @@
     <label for="limit">Limit Number of Matches:</label>
     <input type="number" id="limit" min="1">
     <button id="searchButton">Search</button>
-    
+
     <!--user created lists section-->
     <div>
         <input type="text" id="listName" placeholder="Enter List Name">
         <button onclick="createList()">Create List</button>
-        <select id="existingLists"></select>
+        <select id="existingLists" onchange="displaySelectedList()"></select>
     </div>
+    <div id="selectedSuperheroesList"></div>
+
+
+<div id="superheroesList"></div>
 
     <div id="searchResults"></div>
     <script src="script.js"></script>
