@@ -1,13 +1,17 @@
 const express = require('express');
 const fs = require('fs');
+const path = require('path');
 const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
 
+const superheroInfoPath = path.join(__dirname, 'superhero_info.json');
+const superheroPowersPath = path.join(__dirname, 'superhero_powers.json');
+
 let superheroLists = [];//all user created lists
 
 let superheroData = [];//all superhero data
-fs.readFile('server/superhero_info.json', 'utf8', (err, data) => {
+fs.readFile(superheroInfoPath, 'utf8', (err, data) => {
     if (err) {
         console.error('Error reading superhero_info.json file: ', err);
         return;
@@ -30,7 +34,7 @@ app.use(bodyParser.json());
 app.get('/superhero/', (req, res) => {
     const superheroName = req.query.name; //extract the hero name
 
-    fs.readFile('server/superhero_info.json', 'utf8', (err, data) => {
+    fs.readFile(superheroInfoPath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading superhero_info.json file: ', err);
             res.status(500).json({ error: 'Error reading superhero_info.json file' });
@@ -59,13 +63,13 @@ app.get('/superhero/', (req, res) => {
 app.get('/superhero/:id/powers', (req, res) => {
     const superheroID = req.params.id;
 
-    fs.readFile('server/superhero_info.json', 'utf8', (err, infoData) => {
+    fs.readFile(superheroInfoPath, 'utf8', (err, infoData) => {
         if (err) {
             console.error('Error reading superhero_info.json file: ', err);
             res.status(500).json({ error: 'Error reading superhero_info.json file' });
             return;
         }
-        fs.readFile('server/superhero_powers.json', 'utf8', (err, powersData) => {
+        fs.readFile(superheroPowersPath, 'utf8', (err, powersData) => {
             if (err) {
                 console.error('Error reading superhero_powers.json file: ', err);
                 res.status(500).json({ error: 'Error reading superhero_powers.json file' });
@@ -101,7 +105,7 @@ app.get('/superhero/:id/powers', (req, res) => {
 
 //get publishers
 app.get('/publishers', (req, res) => {
-    fs.readFile('server/superhero_info.json', 'utf8', (err, data) => {
+    fs.readFile(superheroInfoPath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading superhero_info.json file: ', err);
             res.status(500).json({ error: 'Error reading superhero_info.json file' });
