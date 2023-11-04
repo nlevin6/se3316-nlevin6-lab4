@@ -20,7 +20,11 @@ fs.readFile(superheroInfoPath, 'utf8', (err, data) => {
 });
 
 //set up serving front-end code
-app.use(express.static('client'));
+app.use(express.static(path.join(__dirname, '../client')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client', 'index.html'));
+});
 
 //middleware to do logging
 app.use((req, res, next) => {
